@@ -5,17 +5,14 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 
-// Initialize core Express app instance
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'promptops-production-secret-key-2026';
 
-// Middleware for CORS and JSON body parsing
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Gracefully attempt Firebase Admin initialization if credentials exist
 let firebaseAdmin = null;
 try {
   const admin = require('firebase-admin');
@@ -43,7 +40,6 @@ try {
   );
 }
 
-// Initialize Google Gen AI client with fallback check
 let aiClient = null;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY;
 
@@ -63,7 +59,6 @@ if (GEMINI_API_KEY) {
   );
 }
 
-// In-memory data structures for fast prototyping & fallback state persistence
 const users = [
   {
     id: 'user-1',
@@ -77,10 +72,6 @@ const users = [
 const promptLibrary = [];
 const feedbackLog = [];
 
-/**
- * Mandatory Authentication Middleware
- * Verifies standard JWT or Firebase ID Token header
- */
 async function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -92,7 +83,7 @@ async function authenticateToken(req, res, next) {
     });
   }
 
-  // Check Firebase ID Token if Firebase Admin initialized
+  // Verify Firebase ID Token if Admin SDK is active
   if (firebaseAdmin) {
     try {
       const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
@@ -106,11 +97,11 @@ async function authenticateToken(req, res, next) {
       };
       return next();
     } catch (fbErr) {
-      // Fall through to standard JWT check if Firebase verification fails
+      // Fall through to local JWT check if Firebase verification fails
     }
   }
 
-  // Verify internal JWT token
+  // Verify standard internal JWT token
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
       return res.status(401).json({
@@ -123,9 +114,6 @@ async function authenticateToken(req, res, next) {
   });
 }
 
-/**
- * Optional Authentication Middleware for guest actions
- */
 function optionalAuthenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -149,9 +137,6 @@ function optionalAuthenticateToken(req, res, next) {
   });
 }
 
-/**
- * Core Prompt Synthesis Function using Gemini 2.5 Flash API or Fallback Engine
- */
 async function generatePromptWithGemini(
   concept,
   mode = 'quick',
@@ -184,11 +169,14 @@ Always respond strictly in valid JSON format with three key fields:
         },
       });
 
-      const text = response.text();
-      const parsed = JSON.parse(text);
+      let rawText = response.text || '';
+      // Strip markdown code fences if returned by the LLM
+      rawText = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/, '').trim();
+
+      const parsed = JSON.parse(rawText);
       return {
         title: parsed.title || concept.slice(0, 30),
-        prompt: parsed.prompt || text,
+        prompt: parsed.prompt || rawText,
         explanation:
           parsed.explanation ||
           'Structured for optimum response consistency.',
@@ -201,7 +189,6 @@ Always respond strictly in valid JSON format with three key fields:
     }
   }
 
-  // Algorithmic Fallback Synthesis Engine
   const titleWords = concept.split(' ').slice(0, 4).join(' ');
   const formattedTitle =
     titleWords.charAt(0).toUpperCase() + titleWords.slice(1);
@@ -531,17 +518,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Serve static assets from public or root directory
+// Serve static assets from project root
 app.use(express.static(__dirname));
 
-// Default entrypoint route handler
+// Entrypoint route
 app.get('/', (req, res) => {
-  const homePath = path.join(__dirname, 'home.html');
   const indexPath = path.join(__dirname, 'index.html');
-  if (fs.existsSync(homePath)) {
-    res.sendFile(homePath);
-  } else if (fs.existsSync(indexPath)) {
+  const homePath = path.join(__dirname, 'home.html');
+
+  if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
+  } else if (fs.existsSync(homePath)) {
+    res.sendFile(homePath);
   } else {
     res.send(
       '<h1>PromptOps Server Running</h1><p>Static files loaded successfully.</p>'
