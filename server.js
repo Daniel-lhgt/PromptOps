@@ -1,53 +1,31 @@
 require('dotenv').config();
-
-// Now you can access your key anywhere in your backend
-const apiKey = process.env.GEMINI_API_KEY;
-
-console.log('Key loaded successfully:', apiKey ? 'Yes' : 'No');
-const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccountKey.json');
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 
+// Initialize core Express app instance
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET =
-  process.env.JWT_SECRET || 'promptops-production-secret-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'promptops-production-secret-key-2026';
 
-// Enable CORS and body parsing
+// Middleware for CORS and JSON body parsing
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Initialize Firebase Admin SDK
+// Gracefully attempt Firebase Admin initialization if credentials exist
 let firebaseAdmin = null;
 try {
   const admin = require('firebase-admin');
-  const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
-
-  if (fs.existsSync(serviceAccountPath)) {
-    const serviceAccount = require('./serviceAccountKey.json');
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-    firebaseAdmin = admin;
-    console.log('✅ Firebase Admin initialized from serviceAccountKey.json');
-  } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
     firebaseAdmin = admin;
-    console.log(
-      '✅ Firebase Admin initialized from FIREBASE_SERVICE_ACCOUNT env'
-    );
+    console.log('✅ Firebase Admin SDK initialized successfully');
   } else if (
     process.env.GOOGLE_APPLICATION_CREDENTIALS &&
     fs.existsSync(process.env.GOOGLE_APPLICATION_CREDENTIALS)
@@ -56,17 +34,16 @@ try {
       credential: admin.credential.applicationDefault(),
     });
     firebaseAdmin = admin;
-    console.log('✅ Firebase Admin initialized via default credentials');
-  } else {
-    console.log(
-      '⚠️ serviceAccountKey.json not found, running in fallback auth mode'
-    );
+    console.log('✅ Firebase Admin SDK initialized via default credentials');
   }
 } catch (error) {
-  console.warn('⚠️ Firebase Admin SDK initialization failed:', error.message);
+  console.warn(
+    '⚠️ Firebase Admin SDK initialization skipped:',
+    error.message
+  );
 }
 
-// Initialize Google Gemini AI SDK
+// Initialize Google Gen AI client with fallback check
 let aiClient = null;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY;
 
@@ -74,19 +51,19 @@ if (GEMINI_API_KEY) {
   try {
     const { GoogleGenAI } = require('@google/genai');
     aiClient = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-    console.log('✅ Google Gemini API client initialized');
+    console.log('✅ Google Gemini API client active');
   } catch (err) {
     console.warn(
-      '⚠️ @google/genai package failed to initialize, using fallback synthesis engine'
+      '⚠️ @google/genai package not found or failed to load. Defaulting to internal fallback synthesis engine.'
     );
   }
 } else {
   console.warn(
-    '⚠️ GEMINI_API_KEY not found in environment, defaulting to internal synthesis engine'
+    '⚠️ GEMINI_API_KEY not found in environment. Operating in internal fallback mode.'
   );
 }
 
-// In-memory data store for fallback state persistence
+// In-memory data structures for fast prototyping & fallback state persistence
 const users = [
   {
     id: 'user-1',
@@ -100,6 +77,10 @@ const users = [
 const promptLibrary = [];
 const feedbackLog = [];
 
+/**
+ * Mandatory Authentication Middleware
+ * Verifies standard JWT or Firebase ID Token header
+ */
 async function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -111,33 +92,40 @@ async function authenticateToken(req, res, next) {
     });
   }
 
-  // First check Firebase Auth ID token if Firebase Admin is available
+  // Check Firebase ID Token if Firebase Admin initialized
   if (firebaseAdmin) {
     try {
       const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
       req.user = {
         id: decodedToken.uid,
         email: decodedToken.email || '',
-        name: decodedToken.name || decodedToken.email?.split('@')[0] || 'User',
+        name:
+          decodedToken.name ||
+          decodedToken.email?.split('@')[0] ||
+          'User',
       };
       return next();
     } catch (fbErr) {
-      // Token wasn't a Firebase token, proceed to standard JWT
+      // Fall through to standard JWT check if Firebase verification fails
     }
   }
 
   // Verify internal JWT token
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
-      return res
-        .status(401)
-        .json({ ok: false, error: 'Session expired or invalid token.' });
+      return res.status(401).json({
+        ok: false,
+        error: 'Session expired or invalid authentication token.',
+      });
     }
     req.user = user;
     next();
   });
 }
 
+/**
+ * Optional Authentication Middleware for guest actions
+ */
 function optionalAuthenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -161,6 +149,9 @@ function optionalAuthenticateToken(req, res, next) {
   });
 }
 
+/**
+ * Core Prompt Synthesis Function using Gemini 2.5 Flash API or Fallback Engine
+ */
 async function generatePromptWithGemini(
   concept,
   mode = 'quick',
@@ -168,7 +159,7 @@ async function generatePromptWithGemini(
 ) {
   const systemInstruction = `You are PromptOps, an enterprise-grade prompt engineering assistant. 
 Your goal is to transform rough user ideas into production-ready system prompts and structured agent instructions.
-Always respond in JSON format with three fields:
+Always respond strictly in valid JSON format with three key fields:
 {
   "title": "A short, descriptive 3-5 word title for this prompt",
   "prompt": "The complete, structured system prompt with clear roles, directives, constraints, and output format",
@@ -199,17 +190,18 @@ Always respond in JSON format with three fields:
         title: parsed.title || concept.slice(0, 30),
         prompt: parsed.prompt || text,
         explanation:
-          parsed.explanation || 'Structured for optimum response consistency.',
+          parsed.explanation ||
+          'Structured for optimum response consistency.',
       };
     } catch (apiError) {
       console.warn(
-        'Gemini API call failed, using internal synthesis fallback:',
+        'Gemini API invocation error. Using internal synthesis fallback:',
         apiError.message
       );
     }
   }
 
-  // Fallback prompt synthesis engine
+  // Algorithmic Fallback Synthesis Engine
   const titleWords = concept.split(' ').slice(0, 4).join(' ');
   const formattedTitle =
     titleWords.charAt(0).toUpperCase() + titleWords.slice(1);
@@ -238,6 +230,7 @@ You are an expert AI Assistant specialized in: "${concept}". Your objective is t
   };
 }
 
+// POST /api/auth/register
 app.post('/api/auth/register', (req, res) => {
   const { name, email, password } = req.body;
 
@@ -284,6 +277,7 @@ app.post('/api/auth/register', (req, res) => {
   });
 });
 
+// POST /api/auth/login
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;
 
@@ -314,6 +308,7 @@ app.post('/api/auth/login', (req, res) => {
   });
 });
 
+// GET /api/auth/me
 app.get('/api/auth/me', authenticateToken, (req, res) => {
   const user = users.find((u) => u.id === req.user.id) || req.user;
   return res.json({
@@ -327,6 +322,7 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
   });
 });
 
+// POST /api/prompts/quick
 app.post('/api/prompts/quick', authenticateToken, async (req, res) => {
   const { concept, regenerate } = req.body;
 
@@ -365,6 +361,7 @@ app.post('/api/prompts/quick', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/prompts/create
 app.post('/api/prompts/create', authenticateToken, async (req, res) => {
   const { concept } = req.body;
 
@@ -401,6 +398,7 @@ app.post('/api/prompts/create', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/prompts/refine
 app.post('/api/prompts/refine', authenticateToken, async (req, res) => {
   const { original_prompt, instructions } = req.body;
 
@@ -432,7 +430,7 @@ app.post('/api/prompts/refine', authenticateToken, async (req, res) => {
       });
     } catch (e) {
       console.warn(
-        'Refinement via API failed, using manual appending:',
+        'Refinement via API failed, using fallback formatter:',
         e.message
       );
     }
@@ -447,6 +445,7 @@ app.post('/api/prompts/refine', authenticateToken, async (req, res) => {
   });
 });
 
+// POST /api/prompts/save
 app.post('/api/prompts/save', authenticateToken, (req, res) => {
   const { title, prompt, explanation } = req.body;
 
@@ -474,6 +473,7 @@ app.post('/api/prompts/save', authenticateToken, (req, res) => {
   });
 });
 
+// GET /api/prompts
 app.get('/api/prompts', authenticateToken, (req, res) => {
   const userPrompts = promptLibrary.filter(
     (p) => p.userId === req.user.id || p.userId === 'guest'
@@ -484,6 +484,7 @@ app.get('/api/prompts', authenticateToken, (req, res) => {
   });
 });
 
+// DELETE /api/prompts/:id
 app.delete('/api/prompts/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
   const index = promptLibrary.findIndex(
@@ -498,6 +499,7 @@ app.delete('/api/prompts/:id', authenticateToken, (req, res) => {
   return res.status(404).json({ ok: false, error: 'Prompt not found' });
 });
 
+// POST /api/feedback
 app.post('/api/feedback', optionalAuthenticateToken, (req, res) => {
   const { type, feedback } = req.body;
 
@@ -517,7 +519,7 @@ app.post('/api/feedback', optionalAuthenticateToken, (req, res) => {
   });
 });
 
-// Health check route
+// GET /api/health
 app.get('/api/health', (req, res) => {
   res.json({
     ok: true,
@@ -529,10 +531,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Serve static assets from current directory
+// Serve static assets from public or root directory
 app.use(express.static(__dirname));
 
-// Serve index.html or home.html on root
+// Default entrypoint route handler
 app.get('/', (req, res) => {
   const homePath = path.join(__dirname, 'home.html');
   const indexPath = path.join(__dirname, 'index.html');
@@ -547,7 +549,7 @@ app.get('/', (req, res) => {
   }
 });
 
-// Global Error Handler
+// Global Error Handler Middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled Server Error:', err);
   res.status(500).json({
@@ -556,6 +558,7 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Start Express HTTP Server
 app.listen(PORT, () => {
   console.log(`=================================`);
   console.log(`🚀 PromptOps Backend running on http://localhost:${PORT}`);
