@@ -162,7 +162,7 @@ Always respond strictly in valid JSON format with three key fields:
   if (aiClient) {
     try {
       const response = await aiClient.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: `${systemInstruction}\n\nTask: ${userQuery}`,
         config: {
           responseMimeType: 'application/json',
@@ -406,7 +406,7 @@ app.post('/api/prompts/refine', authenticateToken, async (req, res) => {
   if (aiClient) {
     try {
       const response = await aiClient.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: `Revise and improve the following AI system prompt based on these instructions.\n\nOriginal Prompt:\n${original_prompt}\n\nRefinement Instruction:\n${instructions}\n\nProvide ONLY the refined system prompt text directly without extra commentary.`,
       });
 
