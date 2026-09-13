@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PromptOps — Home</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+        <!-- Standard PNG Favicon -->
+  <link rel="icon" type="image/png" href="/favicon.png">
+      
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              ops: {
+                bg: 'rgb(12, 12, 16)',
+                surface: 'rgb(21, 21, 31)',
+                card: 'rgba(22, 22, 34, 0.85)',
+                border: 'rgba(99, 102, 241, 0.15)',
+                borderSoft: 'rgba(255, 255, 255, 0.06)',
+                accent: '#6366F1',
+                accentLight: '#818CF8',
+                gold: '#F59E0B',
+                success: '#10B981',
+                text: '#F8FAFC',
+                textMuted: '#94A3B8',
+                textSoft: '#64748B',
+                error: '#EF4444',
+                'bg-light': '#F8FAFC',
+                'surface-light': '#FFFFFF',
+                'card-light': 'rgba(255, 255, 255, 0.85)',
+                'border-light': 'rgba(99, 102, 241, 0.12)',
+                'text-light': '#0F172A',
+                'textMuted-light': '#64748B',
+              },
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .glass {
+          @apply dark:bg-ops-card dark:backdrop-blur-xl dark:backdrop-saturate-150
+           bg-ops-card-light backdrop-blur-xl backdrop-saturate-150;
+        }
+        .gradient-primary {
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        .gradient-text {
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          background-image: linear-gradient(135deg, #6366f1, #c084fc);
+        }
+        .btn-press {
+          transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.2s ease;
+        }
+        .btn-press:active {
+          transform: scale(0.97);
+        }
+        .page {
+          display: none;
+          animation: pageFade 0.3s ease-out;
+        }
+        .page.active {
+          display: block;
+        }
+        @keyframes pageFade {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .safe-bottom {
+          padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+        }
+        .theme-transition {
+          transition: background-color 0.3s ease, color 0.3s ease,
+            border-color 0.3s ease;
+        }
+        .avatar-ring {
+          box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25),
+            0 0 12px rgba(99, 102, 241, 0.15);
+        }
+        .icon-btn {
+          @apply w-10 h-10 rounded-xl glass dark:border dark:border-ops-borderSoft border border-ops-border-light flex items-center justify-center btn-press hover:border-ops-accent/40 hover:text-ops-accent transition-all;
+        }
+        .icon-btn.active {
+          @apply dark:bg-ops-accent/10 bg-ops-accent/5 dark:border-ops-accent/30 border-ops-accent/30 text-ops-accent;
+        }
+        .modal-backdrop {
+          @apply fixed inset-0 z-[100] flex items-center justify-center p-4;
+          background: rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(8px);
+        }
+        .modal-backdrop.hidden {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="dark:bg-ops-bg bg-ops-bg-light dark:text-ops-text text-ops-text-light font-sans antialiased theme-transition"
+  >
+    <div id="app" class="min-h-screen relative overflow-x-hidden">
+      <!-- Background Texture -->
+      <div class="fixed inset-0 pointer-events-none">
+        <div
+          class="absolute top-0 right-0 w-[400px] h-[400px] dark:bg-ops-accent/10 bg-ops-accent/5 rounded-full blur-[100px] -translate-y-1/3 translate-x-1/3"
+        ></div>
+        <div
+          class="absolute bottom-0 left-0 w-[300px] h-[300px] dark:bg-ops-gold/8 bg-ops-gold/5 rounded-full blur-[80px] translate-y-1/4 -translate-x-1/4"
+        ></div>
+      </div>
+
+      <!-- STICKY HEADER -->
+      <header
+        class="sticky top-0 z-40 glass dark:border-b dark:border-ops-border border-b border-ops-border-light px-4 py-3 theme-transition"
+      >
+        <div class="max-w-md mx-auto flex items-center justify-between">
+          <!-- Logo + Brand -->
+          <div class="flex items-center gap-3">
+            <div
+              class="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-ops-accent/20"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#fff"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-lg font-bold tracking-tight">PromptOps</h1>
+              <p
+                id="page-subtitle"
+                class="text-[10px] dark:text-ops-textMuted text-ops-textMuted-light"
+              >
+                Turn ideas into production prompts
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Actions: Credits + Theme + Profile Avatar -->
+          <div class="flex items-center gap-2">
+            <!-- Credits Box (Always Visible) -->
+            <div
+              id="credits-display"
+              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg dark:bg-ops-accent/10 bg-ops-accent/5 dark:text-ops-accent text-ops-accent text-xs font-semibold border dark:border-ops-accent/20 border-ops-accent/15"
+              title="Max limit: 50 credits"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path
+                  d="M12 6v12M15 9.5c0-1.38-1.34-2.5-3-2.5s-3 1.12-3 2.5 1.34 2.5 3 2.5 3 1.12 3 2.5-1.34 2.5-3 2.5"
+                />
+              </svg>
+              <span id="credit-count">50/50</span>
+            </div>
+
+            <!-- Theme Toggle -->
+            <button
+              id="theme-toggle"
+              class="w-9 h-9 rounded-xl glass dark:border dark:border-ops-border border border-ops-border-light flex items-center justify-center dark:text-ops-textMuted text-ops-textMuted-light btn-press hover:text-ops-accent transition-all"
+            >
+              <svg
+                id="theme-icon-dark"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="hidden"
+              >
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+              <svg
+                id="theme-icon-light"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            </button>
+
+            <!-- Profile Avatar Menu -->
+            <div id="profile-menu" class="relative">
+              <button
+                id="profile-btn"
+                class="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white btn-press text-sm font-bold avatar-ring overflow-hidden"
+              >
+                <span id="profile-initial">U</span>
+              </button>
+              <div
+                id="profile-dropdown"
+                class="hidden absolute right-0 top-11 w-48 glass dark:border dark:border-ops-border border border-ops-border-light rounded-xl p-3 shadow-xl z-50"
+              >
+                <p id="profile-name" class="text-sm font-semibold mb-1">User</p>
+                <p
+                  id="profile-email"
+                  class="text-xs dark:text-ops-textMuted text-ops-textMuted-light mb-3"
+                >
+                  user@example.com
+                </p>
+                <div
+                  class="border-t dark:border-ops-borderSoft border-ops-border-light pt-2 mt-1"
+                >
+                  <button
+                    onclick="goToPage('library')"
+                    class="w-full text-left text-sm dark:text-ops-textMuted text-ops-textMuted-light py-1.5 hover:dark:bg-ops-accent/10 hover:bg-ops-accent/5 rounded-lg px-2 mb-1 flex items-center gap-2"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                      <path
+                        d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                      />
+                    </svg>
+                    My Library
+                  </button>
+                  <button
+                    id="auth-action-btn"
+                    onclick="handleAuthAction()"
+                    class="w-full text-left text-sm text-ops-error py-1.5 hover:bg-ops-error/10 rounded-lg px-2"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE: HOME -->
+      <div
+        id="page-home"
+        class="page active relative pb-28 px-4 max-w-md mx-auto mt-4"
+      >
+        <div class="text-center mb-7">
+          <h2 class="text-xl font-bold mb-2">What are you building?</h2>
+          <p class="dark:text-ops-textMuted text-ops-textMuted-light text-sm">
+            Turn a rough idea into a production-ready prompt.
+          </p>
+        </div>
+
+        <!-- Quick Prompt Card -->
+        <div
+          class="glass dark:border dark:border-ops-border border border-ops-border-light rounded-2xl p-5 mb-5 shadow-lg"
+        >
+          <div class="flex items-center gap-2 mb-3">
+            <div
+              class="w-8 h-8 rounded-lg dark:bg-ops-accent/20 bg-ops-accent/10 flex items-center justify-center dark:text-ops-accent text-ops-accent"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+                />
+              </svg>
+            </div>
+            <span
+              class="text-sm font-semibold dark:text-ops-accent text-ops-accent"
+              >Quick Prompt</span
+            >
+            <span
+              class="ml-auto text-xs dark:text-ops-textMuted text-ops-textMuted-light"
+              >Cost:
+              <span class="font-semibold text-ops-accent">2</span> credits</span
+            >
+          </div>
+          <textarea
+            id="quick-input"
+            rows="3"
+            placeholder="Describe what you want to create..."
+            class="w-full dark:bg-ops-bg/60 bg-white/60 dark:border dark:border-ops-borderSoft border border-ops-border-light rounded-xl p-3.5 text-base leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-ops-accent/40 transition-all"
+          ></textarea>
+          <button
+            id="quick-generate-btn"
+            onclick="generateQuickPrompt()"
+            class="w-full mt-4 py-3.5 rounded-xl gradient-primary text-white font-bold btn-press hover:opacity-90 transition-all"
+          >
+            <span
+              id="quick-btn-text"
+              class="flex items-center justify-center gap-2"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"
+                />
+              </svg>
+              Generate Prompt
+            </span>
+            <span
+              id="quick-btn-loading"
+              class="hidden flex items-center justify-center gap-2"
+            >
+              <svg
+                class="animate-spin inline w-5 h-5 mr-2"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle class="opacity-25" cx="12" cy="12" r="10" />
+                <path class="opacity-75" d="M4 12a8 8 0 018-8" />
+              </svg>
+              Generating...
+            </span>
+          </button>
+        </div>
+
+        <!-- Suggestion Chips -->
+        <div class="mb-5">
+          <p
+            class="text-xs font-semibold dark:text-ops-textMuted text-ops-textMuted-light mb-2 px-1"
+          >
+            Try a suggestion
+          </p>
+          <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            <button
+              class="flex-shrink-0 px-4 py-2 rounded-full glass dark:border dark:border-ops-borderSoft border border-ops-border-light text-sm font-medium btn-press hover:border-ops-accent/40 hover:text-ops-accent transition-all"
+              onclick="document.getElementById('quick-input').value='Create a prompt for an AI coding assistant that helps beginners build websites.'"
+            >
+              AI Coding Assistant
+            </button>
+            <button
+              class="flex-shrink-0 px-4 py-2 rounded-full glass dark:border dark:border-ops-borderSoft border border-ops-border-light text-sm font-medium btn-press hover:border-ops-accent/40 hover:text-ops-accent transition-all"
+              onclick="document.getElementById('quick-input').value='Create a marketing agent that writes compelling social media content.'"
+            >
+              Marketing Agent
+            </button>
+            <button
+              class="flex-shrink-0 px-4 py-2 rounded-full glass dark:border dark:border-ops-borderSoft border border-ops-border-light text-sm font-medium btn-press hover:border-ops-accent/40 hover:text-ops-accent transition-all"
+              onclick="document.getElementById('quick-input').value='Create an image generator prompt that produces professional product photography.'"
+            >
+              Image Generator
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Card -->
+        <div
+          id="result-card"
+          class="hidden glass dark:border dark:border-ops-border border border-ops-border-light rounded-2xl p-5 mb-5 shadow-lg"
+        >
+          <h3
+            class="text-sm font-bold dark:text-ops-accent text-ops-accent mb-3"
+          >
+            Generated Prompt
+          </h3>
+          <div id="result-title" class="font-semibold mb-2"></div>
+          <div
+            id="result-prompt"
+            class="dark:bg-ops-bg/60 bg-white/60 rounded-lg p-3 text-sm whitespace-pre-wrap mb-3"
+          ></div>
+          <div
+            id="result-explanation"
+            class="text-sm dark:text-ops-textMuted text-ops-textMuted-light mb-4"
+          ></div>
+
+          <!-- PREMIUM ACTION BAR -->
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+            <button onclick="copyResult()" class="icon-btn" title="Copy Prompt">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path
+                  d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                />
+              </svg>
+            </button>
+            <button
+              id="btn-thumbs-up"
+              onclick="openFeedbackModal('up')"
+              class="icon-btn"
+              title="Good Result"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"
+                />
+              </svg>
+            </button>
+            <button
+              id="btn-thumbs-down"
+              onclick="openFeedbackModal('down')"
+              class="icon-btn"
+              title="Needs Improvement"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"
+                />
+              </svg>
+            </button>
+            <button
+              onclick="regeneratePrompt()"
+              class="icon-btn"
+              title="Regenerate (1 credit)"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"
+                />
+              </svg>
+            </button>
+            <button
+              onclick="toggleRefine()"
+              class="icon-btn"
+              id="refine-toggle-btn"
+              title="Refine Prompt"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                />
+                <path
+                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Refine Section -->
+          <div id="refine-section" class="mb-3 hidden">
+            <label
+              class="block text-xs font-medium dark:text-ops-textMuted text-ops-textMuted-light mb-1"
+              >Refine / Fix — Costs 1 credit</label
+            >
+            <textarea
+              id="refine-input"
+              rows="2"
+              placeholder="Make it shorter, more friendly, fix a part..."
+              class="w-full dark:bg-ops-bg/60 bg-white/60 dark:border dark:border-ops-borderSoft border border-ops-border-light rounded-lg p-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ops-accent/40 transition-all"
+            ></textarea>
+            <button
+              onclick="applyRefinement()"
+              class="mt-2 w-full py-2 rounded-lg gradient-primary text-white text-sm font-medium btn-press hover:opacity-90 transition-all flex items-center justify-center gap-2"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                />
+                <path
+                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                />
+              </svg>
+              Apply Refinement
+            </button>
+          </div>
+
+          <!-- Save Button -->
+          <button
+            onclick="saveResult()"
+            class="w-full py-2.5 rounded-lg glass dark:border dark:border-ops-accent/30 border border-ops-accent/30 dark:text-ops-accent text-ops-accent text-sm font-semibold btn-press hover:dark:bg-ops-accent/10 hover:bg-ops-accent/5 transition-all mt-2 flex items-center justify-center gap-2"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+              />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            Save to Library
+          </button>
+        </div>
+
+        <!-- Insight Card -->
+        <div
+          class="glass dark:border dark:border-ops-gold/20 border border-ops-gold/20 rounded-xl p-4 dark:bg-ops-gold/5 bg-ops-gold/5"
+        >
+          <div class="flex gap-3 items-start">
+            <div
+              class="w-8 h-8 rounded-lg dark:bg-ops-gold/15 bg-ops-gold/10 flex items-center justify-center dark:text-ops-gold text-ops-gold flex-shrink-0"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p
+                class="text-xs font-semibold dark:text-ops-gold text-ops-gold mb-1"
+              >
+                Prompt Insight
+              </p>
+              <p
+                class="text-sm leading-relaxed dark:text-ops-text/90 text-ops-text-light/90"
+              >
+                The more clearly you define the AI's role and expected output,
+                the more consistent its responses become.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: CREATE -->
+      <div
+        id="page-create"
+        class="page relative pb-28 px-4 max-w-md mx-auto mt-4"
+      >
+        <h2 class="text-xl font-bold mb-2">Create New Prompt</h2>
+        <p
+          class="dark:text-ops-textMuted text-ops-textMuted-light text-sm mb-5"
+        >
+          Structure your prompt like a pro.
+        </p>
+
+        <div
+          class="glass dark:border dark:border-ops-border border border-ops-border-light rounded-2xl p-5 mb-4"
+        >
+          <label
+            class="text-sm font-semibold dark:text-ops-accent text-ops-accent mb-2 block"
+            >Describe your idea</label
+          >
+          <textarea
+            id="create-concept"
+            rows="5"
+            placeholder="What should this AI do? Who is it for? What tone?"
+            class="w-full dark:bg-ops-bg/50 bg-white/50 dark:border dark:border-ops-borderSoft border border-ops-border-light rounded-xl p-3.5 text-base leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-ops-accent/40 transition-all"
+          ></textarea>
+        </div>
+
+        <div
+          class="glass dark:border dark:border-ops-border border border-ops-border-light rounded-2xl p-5 mb-5"
+        >
+          <p
+            class="text-xs font-bold dark:text-ops-accent text-ops-accent mb-3 uppercase tracking-wider"
+          >
+            AI Type
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              class="py-2.5 px-3 rounded-xl gradient-primary text-white text-sm font-medium shadow-lg shadow-ops-accent/20"
+            >
+              System Prompt
+            </button>
+            <button
+              class="py-2.5 px-3 rounded-lg dark:bg-ops-bg/50 bg-white/50 dark:border dark:border-ops-borderSoft border border-ops-border-light text-sm font-medium hover:border-ops-accent/40 transition-all"
+            >
+              Assistant
+            </button>
+            <button
+              class="py-2.5 px-3 rounded-lg dark:bg-ops-bg/50 bg-white/50 dark:border dark:border-ops-borderSoft border border-ops-border-light text-sm font-medium hover:border-ops-accent/40 transition-all"
+            >
+              Agent
+            </button>
+            <button
+              class="py-2.5 px-3 rounded-lg dark:bg-ops-bg/50 bg-white/50 dark:border dark:border-ops-borderSoft border border-ops-border-light text-sm font-medium hover:border-ops-accent/40 transition-all"
+            >
+              Custom
+            </button>
+          </div>
+        </div>
+
+        <button
+          id="build-btn"
+          onclick="startInterview()"
+          class="w-full py-3.5 rounded-xl gradient-primary text-white font-bold btn-press hover:opacity-90 transition-all"
+        >
+          <span
+            id="build-btn-text"
+            class="flex items-center justify-center gap-2"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"
+              />
+            </svg>
+            Build Prompt
+          </span>
+          <span
+            id="build-btn-loading"
+            class="hidden flex items-center justify-center gap-2"
+          >
+            <svg
+              class="animate-spin inline w-5 h-5 mr-2"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle class="opacity-25" cx="12" cy="12" r="10" />
+              <path class="opacity-75" d="M4 12a8 8 0 018-8" />
+            </svg>
+            Analyzing...
+          </span>
+        </button>
+      </div>
+
+      <!-- PAGE: LIBRARY -->
+      <div
+        id="page-library"
+        class="page relative pb-28 px-4 max-w-md mx-auto mt-4"
+      >
+        <h2 class="text-xl font-bold mb-2">Your Library</h2>
+        <p
+          class="dark:text-ops-textMuted text-ops-textMuted-light text-sm mb-5"
+        >
+          Continue, refine, or reuse your prompts anytime.
+        </p>
+
+        <div class="relative mb-5">
+          <svg
+            class="absolute left-4 top-1/2 -translate-y-1/2 dark:text-ops-textMuted text-ops-textMuted-light"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+          <input
+            id="library-search"
+            type="text"
+            placeholder="Search prompts..."
+            class="w-full glass dark:border dark:border-ops-border border border-ops-border-light rounded-xl py-3 pl-11 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-ops-accent/40 transition-all"
+            oninput="searchPrompts()"
+          />
+        </div>
+
+        <div id="library-empty" class="text-center py-12">
+          <div
+            class="w-20 h-20 rounded-2xl glass dark:border dark:border-ops-border border border-ops-border-light flex items-center justify-center mx-auto mb-5 dark:text-ops-textMuted text-ops-textMuted-light"
+          >
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path
+                d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+              />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold mb-2">No prompts saved yet</h3>
+          <p
+            class="dark:text-ops-textMuted text-ops-textMuted-light text-sm mb-5 max-w-xs mx-auto"
+          >
+            Create your first prompt and it will appear here.
+          </p>
+          <button
+            onclick="goToPage('home')"
+            class="px-6 py-3 rounded-xl gradient-primary text-white font-bold btn-press hover:opacity-90 transition-all flex items-center justify-center gap-2 mx-auto"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"
+              />
+            </svg>
+            Create Prompt
+          </button>
+        </div>
+
+        <div id="library-list" class="space-y-3 hidden"></div>
+      </div>
+
+      <!-- FEEDBACK MODAL -->
+      <div
+        id="feedback-modal"
+        class="hidden modal-backdrop"
+        onclick="closeFeedbackModalOnBg(event)"
+      >
+        <div
+          class="glass dark:border dark:border-ops-border border border-ops-border-light rounded-2xl p-5 w-full max-w-sm shadow-2xl"
+          onclick="event.stopPropagation()"
+        >
+          <h3 id="feedback-title" class="text-lg font-bold mb-2">
+            How was this prompt?
+          </h3>
+          <p
+            id="feedback-subtitle"
+            class="text-sm dark:text-ops-textMuted text-ops-textMuted-light mb-4"
+          >
+            Help us improve by sharing your feedback
+          </p>
+          <textarea
+            id="feedback-text"
+            rows="4"
+            placeholder="Tell us more..."
+            class="w-full dark:bg-ops-bg/60 bg-white/60 dark:border dark:border-ops-borderSoft border border-ops-border-light rounded-xl p-3.5 text-base resize-none focus:outline-none focus:ring-2 focus:ring-ops-accent/40 transition-all mb-4"
+          ></textarea>
+          <div class="flex gap-3">
+            <button
+              onclick="closeFeedbackModal()"
+              class="flex-1 py-2.5 rounded-xl glass dark:border dark:border-ops-borderSoft border border-ops-border-light text-sm font-medium btn-press"
+            >
+              Cancel
+            </button>
+            <button
+              onclick="submitFeedback()"
+              class="flex-1 py-2.5 rounded-xl gradient-primary text-white text-sm font-semibold btn-press hover:opacity-90 transition-all"
+            >
+              Submit Feedback
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <nav
+        class="fixed bottom-0 left-0 right-0 glass dark:border-t dark:border-ops-border border-t border-ops-border-light safe-bottom z-50"
+      >
+        <div class="flex justify-around max-w-md mx-auto py-2 px-2">
+          <button
+            onclick="goToPage('home')"
+            id="nav-home"
+            class="flex flex-col items-center gap-1 py-2 px-6 rounded-xl dark:text-ops-accent text-ops-accent"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            <span class="text-[10px] font-bold">Home</span>
+          </button>
+          <button
+            onclick="goToPage('create')"
+            id="nav-create"
+            class="flex flex-col items-center gap-1 py-2 px-6 rounded-xl dark:text-ops-textMuted text-ops-textMuted-light"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"
+              />
+            </svg>
+            <span class="text-[10px] font-bold">Create</span>
+          </button>
+          <button
+            onclick="goToPage('library')"
+            id="nav-library"
+            class="flex flex-col items-center gap-1 py-2 px-6 rounded-xl dark:text-ops-textMuted text-ops-textMuted-light"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path
+                d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+              />
+            </svg>
+            <span class="text-[10px] font-bold">Library</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Toast Notification -->
+      <div
+        id="toast"
+        class="hidden fixed top-20 left-1/2 -translate-x-1/2 glass dark:border dark:border-ops-accent/40 border border-ops-accent/40 px-5 py-3 rounded-xl text-sm font-semibold z-[200] shadow-xl"
+      >
+        <span id="toast-msg"></span>
+      </div>
+    </div>
+
+    <script>
+      // ======================================
+      // THEME SYSTEM
+      // ======================================
+      const THEME_KEY = 'promptops-theme';
+
+      function getTheme() {
+        return localStorage.getItem(THEME_KEY) || 'system';
+      }
+
+      function setTheme(theme) {
+        localStorage.setItem(THEME_KEY, theme);
+        applyTheme(theme);
+      }
+
+      function applyTheme(theme) {
+        const root = document.documentElement;
+        const darkIcon = document.getElementById('theme-icon-dark');
+        const lightIcon = document.getElementById('theme-icon-light');
+
+        if (
+          theme === 'dark' ||
+          (theme === 'system' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ) {
+          root.classList.add('dark');
+          darkIcon?.classList.remove('hidden');
+          lightIcon?.classList.add('hidden');
+        } else {
+          root.classList.remove('dark');
+          darkIcon?.classList.add('hidden');
+          lightIcon?.classList.remove('hidden');
+        }
+      }
+
+      function cycleTheme() {
+        const current = getTheme();
+        const next = current === 'dark' ? 'light' : 'dark';
+        setTheme(next);
+        showToast(
+          `Theme: ${next.charAt(0).toUpperCase() + next.slice(1)} Mode`
+        );
+      }
+
+      applyTheme(getTheme());
+      document
+        .getElementById('theme-toggle')
+        ?.addEventListener('click', cycleTheme);
+
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', () => {
+          if (getTheme() === 'system') applyTheme('system');
+        });
+
+      // ======================================
+      // CREDIT SYSTEM (Max 50, 12h Refill)
+      // ======================================
+      const CREDIT_KEY = 'promptops_credits';
+      const LAST_CREDIT_TIME_KEY = 'promptops_last_credit_timestamp';
+      const REFILL_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours in ms
+      const MAX_CREDITS = 50;
+      const COST_GENERATE = 2;
+      const COST_REGENERATE = 1;
+      const COST_REFINE = 1;
+
+      let currentCredits = 50;
+
+      function getRemainingRefillTime() {
+        const lastTime =
+          parseInt(localStorage.getItem(LAST_CREDIT_TIME_KEY)) || Date.now();
+        const elapsed = Date.now() - lastTime;
+        const remainingMs = Math.max(0, REFILL_INTERVAL - elapsed);
+        const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+        const minutes = Math.ceil(
+          (remainingMs % (1000 * 60 * 60)) / (1000 * 60)
+        );
+        return { remainingMs, hours, minutes };
+      }
+
+      function initCredits() {
+        const savedCredits = localStorage.getItem(CREDIT_KEY);
+        let lastTime = parseInt(localStorage.getItem(LAST_CREDIT_TIME_KEY));
+
+        if (savedCredits === null || isNaN(parseInt(savedCredits))) {
+          currentCredits = MAX_CREDITS;
+          lastTime = Date.now();
+          localStorage.setItem(CREDIT_KEY, currentCredits);
+          localStorage.setItem(LAST_CREDIT_TIME_KEY, lastTime);
+        } else {
+          currentCredits = Math.min(
+            MAX_CREDITS,
+            Math.max(0, parseInt(savedCredits))
+          );
+        }
+
+        if (!lastTime) {
+          lastTime = Date.now();
+          localStorage.setItem(LAST_CREDIT_TIME_KEY, lastTime);
+        }
+
+        const now = Date.now();
+        const elapsed = now - lastTime;
+
+        if (elapsed >= REFILL_INTERVAL) {
+          const usedAmount = MAX_CREDITS - currentCredits;
+          if (usedAmount > 0) {
+            if (currentCredits === 0) {
+              currentCredits = MAX_CREDITS;
+              showToast(`12-hour refill complete! Full 50 credits restored.`);
+            } else {
+              currentCredits = MAX_CREDITS; // Refills only the used amount back to 50 max
+              showToast(
+                `12-hour refill: Restored ${usedAmount} used credits back to 50.`
+              );
+            }
+            localStorage.setItem(CREDIT_KEY, currentCredits);
+            localStorage.setItem(LAST_CREDIT_TIME_KEY, now);
+          }
+        }
+
+        updateCreditDisplay();
+      }
+
+      function updateCreditDisplay() {
+        const el = document.getElementById('credit-count');
+        if (el) el.textContent = `${currentCredits}/${MAX_CREDITS}`;
+        localStorage.setItem(CREDIT_KEY, currentCredits);
+      }
+
+      function useCredits(amount) {
+        initCredits();
+        if (currentCredits < amount) {
+          const { hours, minutes } = getRemainingRefillTime();
+          if (currentCredits === 0) {
+            showToast(
+              `0 credits remaining. Please wait ${hours}h ${minutes}m for 12-hour refill.`
+            );
+          } else {
+            showToast(
+              `Insufficient credits (${currentCredits} left). Next refill in ${hours}h ${minutes}m.`
+            );
+          }
+          return false;
+        }
+
+        currentCredits -= amount;
+        if (currentCredits < 0) currentCredits = 0;
+
+        let lastTime = parseInt(localStorage.getItem(LAST_CREDIT_TIME_KEY));
+        if (!lastTime || currentCredits === MAX_CREDITS - amount) {
+          localStorage.setItem(LAST_CREDIT_TIME_KEY, Date.now());
+        }
+
+        updateCreditDisplay();
+        return true;
+      }
+
+      // ======================================
+      // API CLIENT & AUTH
+      // ======================================
+      const API_BASE = '/api';
+
+      function getToken() {
+        return localStorage.getItem('token');
+      }
+
+      function setAuthState(isAuth, user = null) {
+        const profileName = document.getElementById('profile-name');
+        const profileEmail = document.getElementById('profile-email');
+        const profileInitial = document.getElementById('profile-initial');
+        const authActionBtn = document.getElementById('auth-action-btn');
+
+        if (isAuth && user) {
+          if (profileName) profileName.textContent = user.name || 'User';
+          if (profileEmail) profileEmail.textContent = user.email || '';
+          if (profileInitial)
+            profileInitial.textContent = (user.name ||
+              user.email ||
+              'U')[0].toUpperCase();
+          if (authActionBtn) {
+            authActionBtn.textContent = 'Sign Out';
+            authActionBtn.className =
+              'w-full text-left text-sm text-ops-error py-1.5 hover:bg-ops-error/10 rounded-lg px-2';
+          }
+          loadPrompts();
+        } else {
+          if (profileName) profileName.textContent = 'Guest User';
+          if (profileEmail) profileEmail.textContent = 'Not signed in';
+          if (profileInitial) profileInitial.textContent = 'U';
+          if (authActionBtn) {
+            authActionBtn.textContent = 'Sign In';
+            authActionBtn.className =
+              'w-full text-left text-sm text-ops-accent py-1.5 hover:bg-ops-accent/10 rounded-lg px-2 font-medium';
+          }
+        }
+      }
+
+      function handleAuthAction() {
+        const token = getToken();
+        if (token) {
+          signOut();
+        } else {
+          goToAuth();
+        }
+      }
+
+      document.getElementById('profile-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('profile-dropdown')?.classList.toggle('hidden');
+      });
+      document.addEventListener('click', () => {
+        document.getElementById('profile-dropdown')?.classList.add('hidden');
+      });
+
+      async function apiRequest(endpoint, data = {}, method = 'POST') {
+        const token = getToken();
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        try {
+          const res = await fetch(`${API_BASE}${endpoint}`, {
+            method,
+            headers,
+            body: method !== 'GET' ? JSON.stringify(data) : undefined,
+          });
+
+          if (res.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setAuthState(false);
+            showToast('Please sign in to continue');
+            return { ok: false, error: 'Please sign in' };
+          }
+
+          const json = await res.json();
+          return { ok: res.ok, ...json };
+        } catch (err) {
+          return { ok: false, error: 'Network error — check server.' };
+        }
+      }
+
+      function goToAuth() {
+        window.location.href = 'index.html';
+      }
+
+      function signOut() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setAuthState(false);
+        showToast('Signed out successfully');
+        // Automatically redirect to index.html on Sign Out
+        window.location.href = 'index.html';
+      }
+
+      function checkAuth() {
+        const userStr = localStorage.getItem('user');
+        const token = getToken();
+        if (token && userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            setAuthState(true, user);
+            return;
+          } catch {}
+        }
+        setAuthState(false);
+      }
+
+      // ======================================
+      // PAGE SWITCHING & UI HELPERS
+      // ======================================
+      const pageSubtitles = {
+        home: 'Turn ideas into production prompts',
+        create: 'Build structured prompts',
+        library: 'Your saved prompts — continue & refine',
+      };
+
+      function goToPage(pageName) {
+        document
+          .querySelectorAll('.page')
+          .forEach((p) => p.classList.remove('active'));
+        document.getElementById(`page-${pageName}`)?.classList.add('active');
+
+        document.querySelectorAll('nav button').forEach((btn) => {
+          btn.classList.remove('dark:text-ops-accent', 'text-ops-accent');
+          btn.classList.add(
+            'dark:text-ops-textMuted',
+            'text-ops-textMuted-light'
+          );
+        });
+        document
+          .getElementById(`nav-${pageName}`)
+          ?.classList.remove(
+            'dark:text-ops-textMuted',
+            'text-ops-textMuted-light'
+          );
+        document
+          .getElementById(`nav-${pageName}`)
+          ?.classList.add('dark:text-ops-accent', 'text-ops-accent');
+
+        document.getElementById('page-subtitle').textContent =
+          pageSubtitles[pageName] || '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        if (pageName === 'library') loadPrompts();
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+        if (!toast || !toastMsg) return;
+
+        toastMsg.textContent = msg;
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 3500);
+      }
+
+      // ======================================
+      // GENERATION & ACTIONS
+      // ======================================
+      let lastGenerated = null;
+      let editingPromptId = null;
+      let currentFeedbackType = null;
+
+      async function generateQuickPrompt() {
+        const concept = document.getElementById('quick-input').value.trim();
+        if (!concept) return showToast('Please enter an idea first');
+        if (!getToken()) return showToast('Please sign in to generate prompts');
+        if (!useCredits(COST_GENERATE)) return;
+
+        const btnText = document.getElementById('quick-btn-text');
+        const btnLoading = document.getElementById('quick-btn-loading');
+        const btn = document.getElementById('quick-generate-btn');
+
+        btnText.classList.add('hidden');
+        btnLoading.classList.remove('hidden');
+        btn.disabled = true;
+
+        const result = await apiRequest('/prompts/quick', {
+          concept,
+          refine_from: editingPromptId,
+        });
+
+        btnText.classList.remove('hidden');
+        btnLoading.classList.add('hidden');
+        btn.disabled = false;
+
+        if (!result.ok) {
+          currentCredits = Math.min(
+            MAX_CREDITS,
+            currentCredits + COST_GENERATE
+          );
+          updateCreditDisplay();
+          return showToast(result.error || 'Failed to generate prompt');
+        }
+
+        lastGenerated = result;
+        document.getElementById('result-card').classList.remove('hidden');
+        document.getElementById('result-title').textContent =
+          result.title || 'Generated Prompt';
+        document.getElementById('result-prompt').textContent =
+          result.prompt || '';
+        document.getElementById('result-explanation').textContent =
+          result.explanation || '';
+        document.getElementById('refine-section').classList.add('hidden');
+        resetFeedbackButtons();
+
+        showToast('Prompt generated!');
+      }
+
+      async function regeneratePrompt() {
+        if (!lastGenerated && !editingPromptId)
+          return showToast('No prompt to regenerate');
+        if (!getToken()) return showToast('Please sign in');
+        if (!useCredits(COST_REGENERATE)) return;
+
+        showToast('Regenerating...');
+
+        const result = await apiRequest('/prompts/quick', {
+          concept: document.getElementById('quick-input').value.trim(),
+          refine_from: editingPromptId || null,
+          regenerate: true,
+        });
+
+        if (!result.ok) {
+          currentCredits = Math.min(
+            MAX_CREDITS,
+            currentCredits + COST_REGENERATE
+          );
+          updateCreditDisplay();
+          return showToast(result.error || 'Failed to regenerate');
+        }
+
+        lastGenerated = result;
+        document.getElementById('result-prompt').textContent =
+          result.prompt || '';
+        document.getElementById('result-explanation').textContent =
+          result.explanation || '';
+        resetFeedbackButtons();
+        showToast('Regenerated!');
+      }
+
+      function toggleRefine() {
+        const section = document.getElementById('refine-section');
+        section.classList.toggle('hidden');
+      }
+
+      async function applyRefinement() {
+        const input = document.getElementById('refine-input').value.trim();
+        if (!input) return showToast('Please enter refinement instructions');
+        if (!useCredits(COST_REFINE)) return;
+
+        showToast('Refining...');
+        const result = await apiRequest('/prompts/refine', {
+          original_prompt: document.getElementById('result-prompt').textContent,
+          instructions: input,
+        });
+
+        if (!result.ok) {
+          currentCredits = Math.min(MAX_CREDITS, currentCredits + COST_REFINE);
+          updateCreditDisplay();
+          return showToast(result.error || 'Failed to refine');
+        }
+
+        if (lastGenerated) lastGenerated.prompt = result.prompt;
+        document.getElementById('result-prompt').textContent = result.prompt;
+        document.getElementById('refine-input').value = '';
+        toggleRefine();
+        showToast('Refined!');
+      }
+
+      function copyResult() {
+        const text = document.getElementById('result-prompt').textContent;
+        if (!text) return;
+        navigator.clipboard.writeText(text);
+        showToast('Copied to clipboard!');
+      }
+
+      async function saveResult() {
+        if (!lastGenerated) return;
+        const res = await apiRequest('/prompts/save', lastGenerated);
+        if (res.ok) showToast('Saved to library!');
+        else showToast(res.error || 'Failed to save');
+      }
+
+      async function startInterview() {
+        const concept = document.getElementById('create-concept').value.trim();
+        if (!concept) return showToast('Please enter your idea first');
+        if (!getToken()) return showToast('Please sign in to build prompts');
+        if (!useCredits(COST_GENERATE)) return;
+
+        const btnText = document.getElementById('build-btn-text');
+        const btnLoading = document.getElementById('build-btn-loading');
+        const btn = document.getElementById('build-btn');
+
+        btnText.classList.add('hidden');
+        btnLoading.classList.remove('hidden');
+        btn.disabled = true;
+
+        const result = await apiRequest('/prompts/create', { concept });
+
+        btnText.classList.remove('hidden');
+        btnLoading.classList.add('hidden');
+        btn.disabled = false;
+
+        if (!result.ok) {
+          currentCredits = Math.min(
+            MAX_CREDITS,
+            currentCredits + COST_GENERATE
+          );
+          updateCreditDisplay();
+          return showToast(result.error || 'Failed to build prompt');
+        }
+
+        lastGenerated = result;
+        goToPage('home');
+        document.getElementById('result-card').classList.remove('hidden');
+        document.getElementById('result-title').textContent =
+          result.title || 'Built Prompt';
+        document.getElementById('result-prompt').textContent =
+          result.prompt || '';
+        document.getElementById('result-explanation').textContent =
+          result.explanation || '';
+        document.getElementById('refine-section').classList.add('hidden');
+        resetFeedbackButtons();
+        showToast('Prompt built successfully!');
+      }
+
+      // ======================================
+      // LIBRARY FUNCTIONS
+      // ======================================
+      let storedPrompts = [];
+
+      async function loadPrompts() {
+        const res = await apiRequest('/prompts', {}, 'GET');
+        if (res.ok && Array.isArray(res.prompts)) {
+          storedPrompts = res.prompts;
+          renderPrompts(storedPrompts);
+        }
+      }
+
+      function renderPrompts(prompts) {
+        const emptyEl = document.getElementById('library-empty');
+        const listEl = document.getElementById('library-list');
+        if (!listEl || !emptyEl) return;
+
+        if (!prompts || prompts.length === 0) {
+          emptyEl.classList.remove('hidden');
+          listEl.classList.add('hidden');
+          return;
+        }
+
+        emptyEl.classList.add('hidden');
+        listEl.classList.remove('hidden');
+
+        listEl.innerHTML = prompts
+          .map(
+            (item) => `
+          <div class="glass dark:border dark:border-ops-border border border-ops-border-light rounded-xl p-4 shadow-sm hover:border-ops-accent/30 transition-all">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="font-bold text-sm text-ops-accent">${escapeHtml(
+                item.title || 'Untitled Prompt'
+              )}</h4>
+              <span class="text-[10px] dark:text-ops-textMuted text-ops-textMuted-light">${new Date(
+                item.createdAt || Date.now()
+              ).toLocaleDateString()}</span>
+            </div>
+            <p class="text-xs dark:bg-ops-bg/50 bg-white/50 p-2.5 rounded-lg font-mono line-clamp-3 mb-3">${escapeHtml(
+              item.prompt
+            )}</p>
+            <div class="flex justify-end gap-2">
+              <button onclick="usePromptFromLibrary(\`${escapeForJs(
+                item.prompt
+              )}\`)" class="px-3 py-1 rounded-lg dark:bg-ops-accent/10 bg-ops-accent/5 text-ops-accent text-xs font-semibold hover:bg-ops-accent/20 transition-all">
+                Use Prompt
+              </button>
+              <button onclick="deletePrompt('${
+                item.id
+              }')" class="px-3 py-1 rounded-lg bg-ops-error/10 text-ops-error text-xs font-semibold hover:bg-ops-error/20 transition-all">
+                Delete
+              </button>
+            </div>
+          </div>
+        `
+          )
+          .join('');
+      }
+
+      function escapeHtml(str) {
+        return (str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function escapeForJs(str) {
+        return (str || '')
+          .replace(/\\/g, '\\\\')
+          .replace(/`/g, '\\`')
+          .replace(/\${/g, '\\${');
+      }
+
+      function searchPrompts() {
+        const query =
+          document.getElementById('library-search')?.value.toLowerCase() || '';
+        const filtered = storedPrompts.filter(
+          (p) =>
+            (p.title && p.title.toLowerCase().includes(query)) ||
+            (p.prompt && p.prompt.toLowerCase().includes(query))
+        );
+        renderPrompts(filtered);
+      }
+
+      async function deletePrompt(id) {
+        const res = await apiRequest(`/prompts/${id}`, {}, 'DELETE');
+        if (res.ok) {
+          showToast('Prompt deleted');
+          loadPrompts();
+        } else {
+          showToast(res.error || 'Failed to delete');
+        }
+      }
+
+      function usePromptFromLibrary(promptText) {
+        goToPage('home');
+        document.getElementById('quick-input').value = promptText;
+        showToast('Loaded prompt into editor');
+      }
+
+      // ======================================
+      // FEEDBACK MODAL
+      // ======================================
+      function openFeedbackModal(type) {
+        currentFeedbackType = type;
+        const modal = document.getElementById('feedback-modal');
+        const title = document.getElementById('feedback-title');
+        if (title) {
+          title.textContent =
+            type === 'up' ? 'What went well?' : 'How can we improve?';
+        }
+        if (modal) modal.classList.remove('hidden');
+      }
+
+      function closeFeedbackModal() {
+        const modal = document.getElementById('feedback-modal');
+        if (modal) modal.classList.add('hidden');
+        const text = document.getElementById('feedback-text');
+        if (text) text.value = '';
+      }
+
+      function closeFeedbackModalOnBg(e) {
+        if (e.target.id === 'feedback-modal') {
+          closeFeedbackModal();
+        }
+      }
+
+      async function submitFeedback() {
+        const feedback = document.getElementById('feedback-text').value.trim();
+        const res = await apiRequest('/feedback', {
+          type: currentFeedbackType,
+          feedback,
+        });
+        if (res.ok) {
+          showToast('Thank you for your feedback!');
+          closeFeedbackModal();
+          if (currentFeedbackType === 'up') {
+            document.getElementById('btn-thumbs-up')?.classList.add('active');
+            document
+              .getElementById('btn-thumbs-down')
+              ?.classList.remove('active');
+          } else {
+            document.getElementById('btn-thumbs-down')?.classList.add('active');
+            document
+              .getElementById('btn-thumbs-up')
+              ?.classList.remove('active');
+          }
+        } else {
+          showToast(res.error || 'Failed to send feedback');
+        }
+      }
+
+      function resetFeedbackButtons() {
+        document.getElementById('btn-thumbs-up')?.classList.remove('active');
+        document.getElementById('btn-thumbs-down')?.classList.remove('active');
+      }
+
+      // ======================================
+      // INIT ON LOAD
+      // ======================================
+      window.addEventListener('DOMContentLoaded', () => {
+        initCredits();
+        checkAuth();
+      });
+    </script>
+  </body>
+</html>

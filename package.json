@@ -1,0 +1,17 @@
+{
+  "name": "promptops",
+  "version": "1.0.0",
+  "description": "PromptOps Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.22.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "firebase-admin": "^14.4.0",
+    "jsonwebtoken": "^9.0.3"
+  }
+}

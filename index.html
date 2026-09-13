@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PromptOps — Authentication</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+      <!-- Standard PNG Favicon -->
+  <link rel="icon" type="image/png" href="/favicon.png">
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              ops: {
+                bg: 'rgb(12, 12, 16)',
+                surface: 'rgb(21, 21, 31)',
+                card: 'rgba(22, 22, 34, 0.85)',
+                border: 'rgba(99, 102, 241, 0.15)',
+                borderSoft: 'rgba(255, 255, 255, 0.06)',
+                accent: '#6366F1',
+                accentLight: '#818CF8',
+                gold: '#F59E0B',
+                success: '#10B981',
+                text: '#F8FAFC',
+                textMuted: '#94A3B8',
+                textSoft: '#64748B',
+                error: '#EF4444',
+                'bg-light': '#F8FAFC',
+                'surface-light': '#FFFFFF',
+                'card-light': 'rgba(255, 255, 255, 0.85)',
+                'border-light': 'rgba(99, 102, 241, 0.12)',
+                'text-light': '#0F172A',
+                'textMuted-light': '#64748B',
+              },
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .glass {
+          @apply dark:bg-ops-card dark:backdrop-blur-xl dark:backdrop-saturate-150
+           bg-ops-card-light backdrop-blur-xl backdrop-saturate-150;
+        }
+        .gradient-primary {
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        .btn-press {
+          transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.2s ease;
+        }
+        .btn-press:active {
+          transform: scale(0.97);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="dark:bg-ops-bg bg-ops-bg-light dark:text-ops-text text-ops-text-light font-sans antialiased min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden"
+  >
+    <!-- Background Texture -->
+    <div class="fixed inset-0 pointer-events-none">
+      <div
+        class="absolute top-0 right-0 w-[450px] h-[450px] dark:bg-ops-accent/10 bg-ops-accent/5 rounded-full blur-[100px] -translate-y-1/3 translate-x-1/3"
+      ></div>
+      <div
+        class="absolute bottom-0 left-0 w-[350px] h-[350px] dark:bg-ops-gold/8 bg-ops-gold/5 rounded-full blur-[80px] translate-y-1/4 -translate-x-1/4"
+      ></div>
+    </div>
+
+    <div
+      class="w-full max-w-md glass dark:border dark:border-ops-border border border-ops-border-light rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10"
+    >
+      <!-- App Logo & Branding -->
+      <div class="text-center mb-6">
+        <div
+          class="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-ops-accent/30 mx-auto mb-3"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#fff"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-extrabold tracking-tight">PromptOps</h1>
+        <p
+          class="text-xs dark:text-ops-textMuted text-ops-textMuted-light mt-1"
+        >
+          Enterprise Prompt Engineering Assistant
+        </p>
+      </div>
+
+      <div
+        class="flex p-1 rounded-xl dark:bg-ops-bg/60 bg-white/60 dark:border dark:border-ops-borderSoft border border-ops-border-light mb-6"
+      >
+        <button
+          id="tab-login"
+          onclick="switchTab('login')"
+          class="flex-1 py-2 rounded-lg text-xs font-bold transition-all gradient-primary text-white shadow-md"
+        >
+          Sign In
+        </button>
+        <button
+          id="tab-register"
+          onclick="switchTab('register')"
+          class="flex-1 py-2 rounded-lg text-xs font-bold transition-all dark:text-ops-textMuted text-ops-textMuted-light hover:text-ops-accent"
+        >
+          Create Account
+        </button>
+      </div>
+
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+        <!-- Full Name (Register Only) -->
+        <div id="group-name" class="hidden space-y-1">
+          <label
+            class="block text-xs font-semibold dark:text-ops-textMuted text-ops-textMuted-light"
+            >Full Name</label
+          >
+          <input
+            type="text"
+            id="auth-name"
+            placeholder="John Doe"
+            class="w-full dark:bg-ops-bg/50 bg-white/50 dark:border dark:border-ops-borderSoft border border-ops-border-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ops-accent/40 transition-all"
+          />
+        </div>
+
+        <!-- Email Input -->
+        <div class="space-y-1">
+          <label
+            class="block text-xs font-semibold dark:text-ops-textMuted text-ops-textMuted-light"
+            >Email Address</label
+          >
+          <input
+            type="email"
+            id="auth-email"
+            required
+            placeholder="name@company.com"
+            class="w-full dark:bg-ops-bg/50 bg-white/50 dark:border dark:border-ops-borderSoft border border-ops-border-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ops-accent/40 transition-all"
+          />
+        </div>
+
+        <!-- Password Input -->
+        <div class="space-y-1">
+          <div class="flex justify-between items-center">
+            <label
+              class="block text-xs font-semibold dark:text-ops-textMuted text-ops-textMuted-light"
+              >Password</label
+            >
+            <button
+              type="button"
+              id="forgot-password-link"
+              onclick="openResetModal()"
+              class="text-xs font-medium text-ops-accent hover:underline"
+            >
+              Forgot password?
+            </button>
+          </div>
+          <div class="relative">
+            <input
+              type="password"
+              id="auth-password"
+              required
+              placeholder="••••••••"
+              class="w-full dark:bg-ops-bg/50 bg-white/50 dark:border dark:border-ops-borderSoft border border-ops-border-light rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-ops-accent/40 transition-all"
+            />
+            <button
+              type="button"
+              onclick="togglePasswordVisibility('auth-password', 'eye-icon')"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-ops-textMuted hover:text-ops-accent transition-colors"
+            >
+              <svg
+                id="eye-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Error Banner -->
+        <div
+          id="error-banner"
+          class="hidden p-3 rounded-xl bg-ops-error/10 border border-ops-error/30 text-ops-error text-xs font-medium"
+        ></div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          id="submit-btn"
+          class="w-full py-3.5 rounded-xl gradient-primary text-white font-bold text-sm btn-press hover:opacity-95 transition-all mt-2"
+        >
+          <span id="submit-btn-text">Sign In</span>
+          <span
+            id="submit-btn-loading"
+            class="hidden flex items-center justify-center gap-2"
+          >
+            <svg
+              class="animate-spin inline w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle class="opacity-25" cx="12" cy="12" r="10" />
+              <path class="opacity-75" d="M4 12a8 8 0 018-8" />
+            </svg>
+            Processing...
+          </span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Password Reset Modal -->
+    <div
+      id="reset-modal"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+    >
+      <div
+        class="w-full max-w-md glass dark:border dark:border-ops-border border border-ops-border-light rounded-3xl p-6 shadow-2xl relative"
+      >
+        <h3 class="text-lg font-bold mb-2">Reset Your Password</h3>
+        <p class="text-xs dark:text-ops-textMuted text-ops-textMuted-light mb-4">
+          Enter your account email address and we'll send you instructions to reset your password.
+        </p>
+        <form onsubmit="handleResetPassword(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold dark:text-ops-textMuted text-ops-textMuted-light mb-1">Email Address</label>
+            <input
+              type="email"
+              id="reset-email"
+              required
+              placeholder="name@company.com"
+              class="w-full dark:bg-ops-bg/50 bg-white/50 dark:border dark:border-ops-borderSoft border border-ops-border-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ops-accent/40 transition-all"
+            />
+          </div>
+          <div
+            id="reset-banner"
+            class="hidden p-3 rounded-xl text-xs font-medium"
+          ></div>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              onclick="closeResetModal()"
+              class="flex-1 py-2.5 rounded-xl dark:bg-ops-surface bg-gray-200 text-xs font-bold hover:opacity-80 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="flex-1 py-2.5 rounded-xl gradient-primary text-white text-xs font-bold btn-press hover:opacity-95 transition-all"
+            >
+              Send Reset Link
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = '/api';
+      let currentMode = 'login'; // 'login' or 'register'
+
+      // Theme setup based on system preference
+      if (
+        window.matchMedia('(prefers-color-scheme: dark)').matches ||
+        localStorage.getItem('promptops-theme') === 'dark'
+      ) {
+        document.documentElement.classList.add('dark');
+      }
+
+      function togglePasswordVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+        } else {
+          input.type = 'password';
+          icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />`;
+        }
+      }
+
+      function openResetModal() {
+        document.getElementById('reset-modal').classList.remove('hidden');
+      }
+
+      function closeResetModal() {
+        document.getElementById('reset-modal').classList.add('hidden');
+        document.getElementById('reset-banner').classList.add('hidden');
+      }
+
+      async function handleResetPassword(event) {
+        event.preventDefault();
+        const email = document.getElementById('reset-email').value.trim();
+        const banner = document.getElementById('reset-banner');
+
+        banner.classList.remove('hidden', 'bg-ops-error/10', 'border-ops-error/30', 'text-ops-error', 'bg-ops-success/10', 'border-ops-success/30', 'text-ops-success');
+
+        try {
+          const res = await fetch(`${API_BASE}/auth/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          });
+          const data = await res.json();
+
+          if (res.ok && data.ok) {
+            banner.className = 'p-3 rounded-xl bg-ops-success/10 border border-ops-success/30 text-ops-success text-xs font-medium';
+            banner.textContent = data.message || 'Password reset link sent to your email!';
+          } else {
+            banner.className = 'p-3 rounded-xl bg-ops-error/10 border border-ops-error/30 text-ops-error text-xs font-medium';
+            banner.textContent = data.error || 'Failed to request password reset.';
+          }
+        } catch (err) {
+          banner.className = 'p-3 rounded-xl bg-ops-error/10 border border-ops-error/30 text-ops-error text-xs font-medium';
+          banner.textContent = 'Server connection failed.';
+        }
+      }
+
+      function switchTab(mode) {
+        currentMode = mode;
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const groupName = document.getElementById('group-name');
+        const submitBtnText = document.getElementById('submit-btn-text');
+        const forgotLink = document.getElementById('forgot-password-link');
+        const errorBanner = document.getElementById('error-banner');
+
+        errorBanner.classList.add('hidden');
+
+        if (mode === 'register') {
+          tabRegister.className =
+            'flex-1 py-2 rounded-lg text-xs font-bold transition-all gradient-primary text-white shadow-md';
+          tabLogin.className =
+            'flex-1 py-2 rounded-lg text-xs font-bold transition-all dark:text-ops-textMuted text-ops-textMuted-light hover:text-ops-accent';
+          groupName.classList.remove('hidden');
+          forgotLink.classList.add('hidden');
+          submitBtnText.textContent = 'Create Account & Get 50 Credits';
+        } else {
+          tabLogin.className =
+            'flex-1 py-2 rounded-lg text-xs font-bold transition-all gradient-primary text-white shadow-md';
+          tabRegister.className =
+            'flex-1 py-2 rounded-lg text-xs font-bold transition-all dark:text-ops-textMuted text-ops-textMuted-light hover:text-ops-accent';
+          groupName.classList.add('hidden');
+          forgotLink.classList.remove('hidden');
+          submitBtnText.textContent = 'Sign In';
+        }
+      }
+
+      async function handleAuthSubmit(event) {
+        event.preventDefault();
+
+        const email = document.getElementById('auth-email').value.trim();
+        const password = document.getElementById('auth-password').value.trim();
+        const name = document.getElementById('auth-name').value.trim();
+        const errorBanner = document.getElementById('error-banner');
+        const btnText = document.getElementById('submit-btn-text');
+        const btnLoading = document.getElementById('submit-btn-loading');
+
+        errorBanner.classList.add('hidden');
+        btnText.classList.add('hidden');
+        btnLoading.classList.remove('hidden');
+
+        const endpoint =
+          currentMode === 'register' ? '/auth/register' : '/auth/login';
+        const payload =
+          currentMode === 'register'
+            ? { name, email, password }
+            : { email, password };
+
+        try {
+          const res = await fetch(`${API_BASE}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data.ok) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            if (data.user?.credits !== undefined) {
+              localStorage.setItem('promptops_credits', data.user.credits);
+            }
+
+            window.location.href = 'home.html';
+          } else {
+            errorBanner.textContent =
+              data.error ||
+              'Authentication failed. Please check your credentials.';
+            errorBanner.classList.remove('hidden');
+          }
+        } catch (err) {
+          errorBanner.textContent =
+            'Server connection failed. Make sure server.js is running.';
+          errorBanner.classList.remove('hidden');
+        } finally {
+          btnText.classList.remove('hidden');
+          btnLoading.classList.add('hidden');
+        }
+      }
+    </script>
+  </body>
+</html>
